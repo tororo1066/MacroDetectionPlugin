@@ -1,0 +1,126 @@
+package macrodetectionplugin.mdp
+
+import org.bukkit.Bukkit
+import org.bukkit.Sound
+import org.bukkit.command.Command
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
+
+var s : CommandSender? = null
+var p : Player? = null
+var macrodetection = false
+var move = true
+var prefix = "§a[MDP]§f"
+lateinit var plugin : MDP
+var time = 0
+class MDP : JavaPlugin() {
+
+
+    override fun onEnable() {
+        plugin = this
+        server.pluginManager.registerEvents(EventListener, plugin)
+        saveDefaultConfig()
+    }
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (label == "mdp"){
+            when(args[0]){
+                "help" ->{
+                    sender.sendMessage("§a")
+                }
+                "move" ->{
+                    if (move){
+                        move = false
+                        sender.sendMessage(prefix + "PlayerMoveEventをoffにしました")
+                    }else{
+                        move = true
+                        sender.sendMessage(prefix + "PlayerMoveEventをonにしました")
+                    }
+                }
+                "action" ->{
+                    if (args.size == 2){
+                        when(args[1]){
+                            "stop" ->{
+                                time = 0
+                                return false
+                            }
+                        }
+                    }
+                    if (args.size != 3)return false
+                    if (macrodetection){
+                        sender.sendMessage(prefix + "他のプレイヤーが実行中です！")
+                    }
+
+                    s = sender
+                    val player : Player? = Bukkit.getPlayer(args[1])
+                    p = player!!
+                    try {
+                        time = args[2].toInt()
+                        if (player.isOnline){
+                            s!!.sendMessage(prefix + "開始")
+                            object : BukkitRunnable(){
+                                override fun run(){
+                                    if (time!! > 0) {
+                                        macrodetection = true
+
+                                    }
+                                    if (time == 0 || !macrodetection){
+                                        macrodetection = false
+                                        sender.sendMessage(prefix + "終了")
+                                        cancel()
+                                    }
+                                    time--
+                                }
+                            }.runTaskTimer(this,0,20)
+                        }else{
+                            sender.sendMessage(prefix + "このプレイヤーはこのサーバーにいません！")
+                        }
+                    }catch (e : NumberFormatException){
+                        sender.sendMessage(prefix + "最後は数字を入力してください！")
+                    }
+
+
+
+
+                }
+
+                "warn" ->{
+                    if (args.size != 3)return false
+                    when(args[1]){
+                        "title" ->{
+                            saveDefaultConfig()
+                            val name = Bukkit.getPlayer(args[2])
+                            if (name!!.isOnline){
+                                name.sendTitle(config.getString("titlemessage").toString(),  "", 1,80,20)
+                                name.playSound(name.location, Sound.valueOf(config.getString("warnsound").toString()),100f,1f)
+                            }else{
+                                sender.sendMessage("このプレイヤーはこのサーバーにはいません！")
+                            }
+                        }
+
+                        "spam" ->{
+                            saveDefaultConfig()
+                            val name = Bukkit.getPlayer(args[2])
+                            if (name!!.isOnline){
+                                for (kaisuu in 1..10){
+                                    name.sendMessage(config.getString("spammessage").toString())
+                                    name.playSound(name.location, Sound.valueOf(config.getString("warnsound").toString()),100f,1f)
+                                }
+
+                            }else{
+                                sender.sendMessage("このプレイヤーはこのサーバーにはいません！")
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        return true
+    }
+}
+
+

@@ -1,0 +1,6 @@
+name: MDP
+version: @version@
+main: macrodetectionplugin.mdp.MDP
+api-version: 1.16
+commands:
+  mdp:
