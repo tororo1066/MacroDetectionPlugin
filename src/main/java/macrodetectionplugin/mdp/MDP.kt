@@ -5,7 +5,6 @@ import org.bukkit.Sound
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 
@@ -29,7 +28,12 @@ class MDP : JavaPlugin() {
         if (label == "mdp"){
             when(args[0]){
                 "help" ->{
-                    sender.sendMessage("§a")
+                    sender.sendMessage("§a================MacroDetectionPlugin================")
+                    sender.sendMessage("§9/mdp action (Player) (time) §aプレイヤーの行動を監視します")
+                    sender.sendMessage("§9/mdp action stop §a監視をストップします")
+                    sender.sendMessage("§9/mdp move §aPlayerMoveEventのオンオフを切り替えられます")
+                    sender.sendMessage("§9/mdp warn (title or spam) (Player) §a警告をします")
+                    sender.sendMessage("§a=================================Another tororo_1066")
                 }
                 "move" ->{
                     if (move){
@@ -63,7 +67,7 @@ class MDP : JavaPlugin() {
                             s!!.sendMessage(prefix + "開始")
                             object : BukkitRunnable(){
                                 override fun run(){
-                                    if (time!! > 0) {
+                                    if (time > 0) {
                                         macrodetection = true
 
                                     }
